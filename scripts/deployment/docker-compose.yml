@@ -38,7 +38,7 @@ services:
   publisher-app:
     build:
       context: ./publisher-app
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-publisher
     container_name: publisher-app
     networks:
       - food-app-network
@@ -57,7 +57,7 @@ services:
   subscriber-app:
     build:
       context: ./subscriber-app
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-subscriber
     container_name: subscriber-app
     networks:
       - food-app-network
