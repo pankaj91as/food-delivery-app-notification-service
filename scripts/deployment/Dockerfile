@@ -1,15 +1,3 @@
-# Base image
-FROM golang:1.20 as builder
-
-# Set working directory inside the container
-WORKDIR /app
-
-# Copy the application code
-COPY . .
-
-# Download dependencies and build the Go binary
-RUN go mod tidy && go build -o app .
-
 # Final image
 FROM alpine:latest
 
@@ -20,7 +8,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 # Copy the compiled binary from the builder stage
-COPY --from=builder /app/app .
+COPY / .
 
 # Expose default app port
 EXPOSE 8080
