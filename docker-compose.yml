@@ -1,0 +1,76 @@
+version: '3.9'
+
+# Define the custom bridge network
+networks:
+  food-app-network:
+    driver: bridge
+
+services:
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672" # RabbitMQ broker
+      - "15672:15672" # RabbitMQ management UI
+    networks:
+      - food-app-network
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - food-app-network
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: food_app_db
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  publisher-app:
+    build:
+      context: ./publisher-app
+      dockerfile: Dockerfile
+    container_name: publisher-app
+    networks:
+      - food-app-network
+    depends_on:
+      - rabbitmq
+      - mysql
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+      MYSQL_DB: food_app_db
+
+  subscriber-app:
+    build:
+      context: ./subscriber-app
+      dockerfile: Dockerfile
+    container_name: subscriber-app
+    networks:
+      - food-app-network
+    depends_on:
+      - rabbitmq
+      - mysql
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+      MYSQL_DB: food_app_db
+
+# Define named volumes for persistent data storage
+volumes:
+  mysql_data:
