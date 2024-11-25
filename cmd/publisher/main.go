@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Define Required Variables
-	publisherQueName := "hello"
+	publisherQueName := "priority"
 	messageBody := "Hello World!"
 
 	// Define Context with timeout 5 Second

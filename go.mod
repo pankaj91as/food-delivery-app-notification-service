@@ -4,5 +4,6 @@ go 1.23.3
 
 require (
 	github.com/Netflix/go-env v0.1.2
+	github.com/gorilla/mux v1.8.1
 	github.com/rabbitmq/amqp091-go v1.10.0
 )
