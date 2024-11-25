@@ -10,9 +10,7 @@ import (
 )
 
 func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
+
 }
 
 func main() {
@@ -36,16 +34,12 @@ func main() {
 	conn := rbtmq.OpenConnection()
 	defer conn.Close()
 
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
+	ch := rbtmq.CreateChannel(conn)
 	defer ch.Close()
 	if !conn.IsClosed() {
 		que := rbtmq.DeclareQueue(ch, &publisherQueName, false, false, false, false, nil)
 
 		messages := rbtmq.ConsumeContent(ch, que)
-		if err != nil {
-			fmt.Println(err)
-		}
 
 		go func() {
 			for d := range messages {
@@ -54,6 +48,7 @@ func main() {
 		}()
 
 		log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+
 		<-forever
 	} else {
 		log.Panic("Message Queue is not alive")
