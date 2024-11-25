@@ -2,7 +2,8 @@ package server
 
 import (
 	"context"
-	"flag"
+	"fmt"
+	"food-delivery-app-notification-service/internal/app/config"
 	"log"
 	"net/http"
 	"os"
@@ -10,15 +11,11 @@ import (
 	"time"
 )
 
-func LaunchServer(routeHandler http.Handler) {
-	var wait time.Duration
-	flag.DurationVar(&wait, "graceful-timeout", time.Second*15, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
-	flag.Parse()
-
+func LaunchServer(timeout time.Duration, routeHandler http.Handler) {
+	fmt.Println("🚀 Launching REST Server...")
 	srv := &http.Server{
-		Handler: routeHandler,
-		Addr:    "127.0.0.1:8000",
-		// Good practice: enforce timeouts for servers you create!
+		Handler:      routeHandler,
+		Addr:         *config.Environment.APP.Host + ":" + *config.Environment.APP.Port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
@@ -30,10 +27,10 @@ func LaunchServer(routeHandler http.Handler) {
 		}
 	}()
 
-	GracefulShutdown(srv, wait)
+	GracefulShutdown(srv, timeout)
 }
 
-func GracefulShutdown(srv *http.Server, wait time.Duration) {
+func GracefulShutdown(srv *http.Server, timeout time.Duration) {
 	c := make(chan os.Signal, 1)
 	// We'll accept graceful shutdowns when quit via SIGINT (Ctrl+C)
 	// SIGKILL, SIGQUIT or SIGTERM (Ctrl+/) will not be caught.
@@ -43,7 +40,7 @@ func GracefulShutdown(srv *http.Server, wait time.Duration) {
 	<-c
 
 	// Create a deadline to wait for.
-	ctx, cancel := context.WithTimeout(context.Background(), wait)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 	// Doesn't block if no connections, but will otherwise wait
 	// until the timeout deadline.

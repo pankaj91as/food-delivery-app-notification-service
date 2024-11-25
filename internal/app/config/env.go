@@ -15,8 +15,8 @@ type loader struct {
 }
 
 type application struct {
-	Host *string `env:"APP_HOST"`
-	Port *int    `env:"APP_PORT"`
+	Host *string `env:"APP_HOST",default:"0.0.0.0"`
+	Port *string `env:"APP_PORT",default:"8000"`
 }
 
 type messageQue struct {
