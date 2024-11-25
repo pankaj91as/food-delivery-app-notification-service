@@ -2,50 +2,46 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"food-delivery-app-notification-service/internal/app/config"
+	"food-delivery-app-notification-service/pkg/rabbitmq"
 	"log"
 	"time"
-
-	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
-}
-
 func main() {
-	conn, err := amqp.Dial("amqp://admin:admin123@0.0.0.0:5672/")
-	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
+	// Define Required Variables
+	publisherQueName := "hello"
+	messageBody := "Hello World!"
 
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
-
-	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
-	)
-	failOnError(err, "Failed to declare a queue")
-
+	// Define Context with timeout 5 Second
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	body := "Hello World!"
-	err = ch.PublishWithContext(ctx,
-		"",     // exchange
-		q.Name, // routing key
-		false,  // mandatory
-		false,  // immediate
-		amqp.Publishing{
-			ContentType: "text/plain",
-			Body:        []byte(body),
-		})
-	failOnError(err, "Failed to publish a message")
-	log.Printf(" [x] Sent %s\n", body)
+	// Panic Recover Functionality
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Panic Recovered in publisher: ", r)
+		}
+	}()
+
+	rbtmq := rabbitmq.NewRabbitMQ(&config.Environment.MQ.ConString)
+
+	conn := rbtmq.OpenConnection()
+	defer conn.Close()
+	if !conn.IsClosed() {
+		ch := rbtmq.CreateChannel(conn)
+		defer ch.Close()
+
+		que := rbtmq.DeclareQueue(ch, &publisherQueName, false, false, false, false, nil)
+
+		err := rbtmq.PublishContent(ch, que, ctx, "", false, false, messageBody)
+		if err != nil {
+			fmt.Println(err)
+		}
+	} else {
+		log.Panic("Message Queue is not alive")
+	}
+
+	log.Printf(" [x] Sent %s\n", messageBody)
 }

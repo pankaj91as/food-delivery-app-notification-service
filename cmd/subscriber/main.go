@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"food-delivery-app-notification-service/internal/app/config"
+	"food-delivery-app-notification-service/pkg/rabbitmq"
 	"log"
-
-	amqp "github.com/rabbitmq/amqp091-go"
+	"time"
 )
 
 func failOnError(err error, msg string) {
@@ -13,43 +16,46 @@ func failOnError(err error, msg string) {
 }
 
 func main() {
-	conn, err := amqp.Dial("amqp://admin:admin123@0.0.0.0:5672/")
-	failOnError(err, "Failed to connect to RabbitMQ")
+	// Define Required Variables
+	publisherQueName := "hello"
+	var forever chan struct{}
+
+	// Define Context with timeout 5 Second
+	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Panic Recover Functionality
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("Panic Recovered in publisher: ", r)
+		}
+	}()
+
+	rbtmq := rabbitmq.NewRabbitMQ(&config.Environment.MQ.ConString)
+
+	conn := rbtmq.OpenConnection()
 	defer conn.Close()
 
 	ch, err := conn.Channel()
 	failOnError(err, "Failed to open a channel")
 	defer ch.Close()
+	if !conn.IsClosed() {
+		que := rbtmq.DeclareQueue(ch, &publisherQueName, false, false, false, false, nil)
 
-	q, err := ch.QueueDeclare(
-		"hello", // name
-		false,   // durable
-		false,   // delete when unused
-		false,   // exclusive
-		false,   // no-wait
-		nil,     // arguments
-	)
-	failOnError(err, "Failed to declare a queue")
-
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	failOnError(err, "Failed to register a consumer")
-
-	var forever chan struct{}
-
-	go func() {
-		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
+		messages := rbtmq.ConsumeContent(ch, que)
+		if err != nil {
+			fmt.Println(err)
 		}
-	}()
 
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
+		go func() {
+			for d := range messages {
+				log.Printf("Received a message: %s", d.Body)
+			}
+		}()
+
+		log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+		<-forever
+	} else {
+		log.Panic("Message Queue is not alive")
+	}
 }
