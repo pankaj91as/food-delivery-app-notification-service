@@ -9,6 +9,8 @@ import (
 
 type IRepository interface {
 	GetOrders(ctx context.Context) ([]model.Orders, error)
+
+	GetCustomers(ctx context.Context) ([]model.Customers, error)
 }
 
 type Repository struct {
