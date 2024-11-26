@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"food-delivery-app-notification-service/internal/app/controller"
-	"food-delivery-app-notification-service/internal/app/middleware"
-	"food-delivery-app-notification-service/internal/app/server"
+	"food-delivery-app-notification-service/internal/app/repository"
+	"food-delivery-app-notification-service/internal/app/router"
+	"food-delivery-app-notification-service/internal/app/service"
+	"food-delivery-app-notification-service/server"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -12,11 +15,23 @@ import (
 
 func main() {
 	var timeout time.Duration
-	flag.DurationVar(&timeout, "graceful-timeout", time.Second*15, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
+	flag.DurationVar(&timeout, "graceful-timeout", 15*time.Second, "the duration for which the server gracefully wait for existing connections to finish - e.g. 15s or 1m")
 	flag.Parse()
 
-	r := mux.NewRouter()
-	r.HandleFunc("/", controller.Handler)
-	r.Use(middleware.LoggingMiddleware)
-	server.LaunchServer(timeout, r)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+
+	restRepo := repository.NewRepoInit()
+	restService := service.NewRestService(restRepo)
+	restController := controller.NewRestController(restService)
+
+	r := router.NewRouter(mux.NewRouter(), restController)
+	restSrv := server.LaunchServer(timeout, r.RestHandler())
+
+	//during shutdown this function will execute to release the resources
+	allCancel := func() {
+		cancel()
+	}
+
+	// Graceful Shutdown Server
+	server.GracefulShutdown(ctx, restSrv, timeout, allCancel)
 }

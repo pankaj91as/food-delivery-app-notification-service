@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 
 	env "github.com/Netflix/go-env"
@@ -15,8 +14,8 @@ type loader struct {
 }
 
 type application struct {
-	Host *string `env:"APP_HOST",default:"0.0.0.0"`
-	Port *string `env:"APP_PORT",default:"8000"`
+	Host *string `env:"APP_HOST, default=0.0.0.0"`
+	Port *string `env:"APP_PORT, default=8000"`
 }
 
 type messageQue struct {
@@ -34,5 +33,5 @@ func init() {
 	}
 
 	// Set RabbitMQ message string
-	Environment.MQ.ConString = fmt.Sprintf("amqp://%s:%s@%s:%s/", *Environment.MQ.MQUsername, *Environment.MQ.MQPassword, *Environment.MQ.MQHost, *Environment.MQ.MQPort)
+	// Environment.MQ.ConString = fmt.Sprintf("amqp://%s:%s@%s:%s/", *Environment.MQ.MQUsername, *Environment.MQ.MQPassword, *Environment.MQ.MQHost, *Environment.MQ.MQPort)
 }
