@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"log"
 
 	env "github.com/Netflix/go-env"
@@ -19,10 +20,10 @@ type application struct {
 }
 
 type messageQue struct {
-	MQUsername *string `env:"MQ_USERNAME"`
-	MQPassword *string `env:"MQ_PASSWORD"`
-	MQHost     *string `env:"MQ_HOST"`
-	MQPort     *string `env:"MQ_PORT"`
+	MQUsername *string `env:"MQ_USERNAME, default=admin"`
+	MQPassword *string `env:"MQ_PASSWORD, default=admin"`
+	MQHost     *string `env:"MQ_HOST, default=localhost"`
+	MQPort     *string `env:"MQ_PORT, default=5672"`
 	ConString  string
 }
 
@@ -33,5 +34,5 @@ func init() {
 	}
 
 	// Set RabbitMQ message string
-	// Environment.MQ.ConString = fmt.Sprintf("amqp://%s:%s@%s:%s/", *Environment.MQ.MQUsername, *Environment.MQ.MQPassword, *Environment.MQ.MQHost, *Environment.MQ.MQPort)
+	Environment.MQ.ConString = fmt.Sprintf("amqp://%s:%s@%s:%s/", *Environment.MQ.MQUsername, *Environment.MQ.MQPassword, *Environment.MQ.MQHost, *Environment.MQ.MQPort)
 }
