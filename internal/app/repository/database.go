@@ -9,6 +9,8 @@ import (
 
 type IRepository interface {
 	GetOrders(ctx context.Context) ([]model.Orders, error)
+	GetOrderByID(ctx context.Context, OrderID string) ([]model.Orders, error)
+	UpdateOrderByID(ctx context.Context, OrderID, OrderStatus string) (int64, error)
 
 	GetCustomers(ctx context.Context) ([]model.Customers, error)
 }
