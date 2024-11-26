@@ -20,7 +20,15 @@ func main() {
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 
-	restRepo := repository.NewRepoInit()
+	// Panic Recover Functionality
+	// defer func() {
+	// 	if r := recover(); r != nil {
+	// 		fmt.Println("Panic Recovered in restapi: ", r)
+	// 	}
+	// }()
+
+	dbConnection, _ := server.RDBMS(ctx)
+	restRepo := repository.NewRepoInit(dbConnection)
 	restService := service.NewRestService(restRepo)
 	restController := controller.NewRestController(restService)
 

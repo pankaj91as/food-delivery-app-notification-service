@@ -12,6 +12,7 @@ var Environment loader
 type loader struct {
 	APP application
 	MQ  messageQue
+	DB  database
 }
 
 type application struct {
@@ -25,6 +26,14 @@ type messageQue struct {
 	MQHost     *string `env:"MQ_HOST, default=localhost"`
 	MQPort     *string `env:"MQ_PORT, default=5672"`
 	ConString  string
+}
+
+type database struct {
+	DBUsername *string `env:"MYSQL_USERNAME, default=admin"`
+	DBPassword *string `env:"MYSQL_PASSWORD, default=password"`
+	DBHost     *string `env:"MYSQL_HOST, default=localhost"`
+	DBPort     *string `env:"MYSQL_PORT, default=3306"`
+	DBName     *string `env:"MYSQL_DBNAME, default=food_app"`
 }
 
 func init() {

@@ -10,8 +10,28 @@ import (
 	"os/signal"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 )
+
+func RDBMS(ctx context.Context) (*sqlx.DB, error) {
+	db, err := sqlx.ConnectContext(ctx, "mysql",
+		*config.Environment.DB.DBUsername+":"+
+			*config.Environment.DB.DBPassword+"@("+
+			*config.Environment.DB.DBHost+":"+
+			*config.Environment.DB.DBPort+")/"+
+			*config.Environment.DB.DBName)
+	if err != nil {
+		log.Panicf("%s:%s", "MySQL database connection failed...", err)
+	}
+	//connection pooling
+	db.SetMaxOpenConns(10)
+	db.SetConnMaxLifetime(20 * time.Second)
+	log.Print("mysql database connection established successfull...")
+
+	return db, nil
+}
 
 func LaunchServer(timeout time.Duration, routeHandler *mux.Router) *http.Server {
 	fmt.Println("🚀 Launching REST Server...")

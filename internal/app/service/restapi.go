@@ -1,8 +1,15 @@
 package service
 
-import "food-delivery-app-notification-service/internal/app/repository"
+import (
+	"context"
+	"food-delivery-app-notification-service/internal/app/repository"
+	"food-delivery-app-notification-service/pkg/model"
+)
 
-type IRestService interface{}
+type IRestService interface {
+	GetOrders(ctx context.Context) []model.Orders
+}
+
 type RestService struct {
 	restRepo repository.IRepository
 }
