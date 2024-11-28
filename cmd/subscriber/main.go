@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"food-delivery-app-notification-service/internal/app/config"
 	"food-delivery-app-notification-service/pkg/rabbitmq"
@@ -10,8 +11,11 @@ import (
 )
 
 func main() {
+	var publisherQueName string
+	flag.StringVar(&publisherQueName, "queue-name", "priority", "Queue name should be pass to reterive messages eg: priority, pramotional")
+	flag.Parse()
+
 	// Define Required Variables
-	publisherQueName := "priority"
 	var forever chan struct{}
 
 	// Define Context with timeout 5 Second

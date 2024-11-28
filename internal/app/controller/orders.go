@@ -2,16 +2,19 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"food-delivery-app-notification-service/internal/app/config"
 	"food-delivery-app-notification-service/internal/app/handler"
 	"food-delivery-app-notification-service/pkg/model"
 	"io"
+	"log"
 	"net/http"
 	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/exp/rand"
 )
 
 func (c *RestController) GetOrders(w http.ResponseWriter, r *http.Request) {
@@ -47,27 +50,47 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 	}
 
 	ctx := r.Context()
-	RowsAffected, _ := c.restService.UpdateOrderByID(ctx, orderID, order.OrderStatus)
-	if int(RowsAffected) > 0 {
-		PriorityQue := config.Environment.CONF.PriorityQue
-		PriorityQueSlice := strings.Split(*PriorityQue, ",")
+	PriorityQue := config.Environment.CONF.PriorityQue
+	PriorityQueSlice := strings.Split(*PriorityQue, ",")
+	fmt.Println(PriorityQueSlice, order.OrderStatus, slices.Contains(PriorityQueSlice, order.OrderStatus))
+	if slices.Contains(PriorityQueSlice, order.OrderStatus) {
+		fmt.Printf("%s queue triggered!\n", *config.Environment.CONF.PramotionalQueueName)
 
-		if slices.Contains(PriorityQueSlice, order.OrderStatus) {
-			handler.Publish(*config.Environment.CONF.PriorityQueueName, "Priority Message!")
-		} else {
-			handler.Publish(*config.Environment.CONF.PramotionalQueueName, "Pramotional Message!")
+		// Notification Template
+		notificationType := []string{"sms", "email", "push"}
+		notificationTemplate, err := config.GetNotificationTemplate(*config.Environment.CONF.PriorityQueueName, notificationType[rand.Intn(len(notificationType))])
+		if err != nil {
+			log.Panicf("Unable to get template from %s/%s", *config.Environment.CONF.PriorityQueueName, notificationType[rand.Intn(len(notificationType))])
 		}
 
-		// return response
-		data := model.Response{
-			Status:  http.StatusAccepted,
-			Message: strconv.Itoa(int(RowsAffected)),
+		// Publish payload into message queue
+		handler.Publish(*config.Environment.CONF.PriorityQueueName, notificationTemplate)
+
+		RowsAffected, _ := c.restService.UpdateOrderByID(ctx, orderID, order.OrderStatus)
+		if int(RowsAffected) > 0 {
+			// return response
+			data := model.Response{
+				Status:  http.StatusAccepted,
+				Message: strconv.Itoa(int(RowsAffected)),
+			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusAccepted)
+			json.NewEncoder(w).Encode(data)
+			return
+		}
+	} else {
+		fmt.Printf("%s queue triggered!\n", *config.Environment.CONF.PramotionalQueueName)
+
+		// Notification Template
+		notificationType := []string{"sms", "email", "push"}
+		notificationTemplate, err := config.GetNotificationTemplate(*config.Environment.CONF.PramotionalQueueName, notificationType[rand.Intn(len(notificationType))])
+		if err != nil {
+			log.Panicf("Unable to get template from %s/%s", *config.Environment.CONF.PramotionalQueueName, notificationType[rand.Intn(len(notificationType))])
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusAccepted)
-		json.NewEncoder(w).Encode(data)
-		return
+		// Publish payload into message queue
+		handler.Publish(*config.Environment.CONF.PramotionalQueueName, notificationTemplate)
 	}
 
 	// return response

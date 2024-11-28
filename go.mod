@@ -9,6 +9,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/rabbitmq/amqp091-go v1.10.0
 	github.com/rs/cors v1.11.1
+	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f
 )
 
 require filippo.io/edwards25519 v1.1.0 // indirect

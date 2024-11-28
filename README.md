@@ -106,3 +106,15 @@ MYSQL_DBNAME=food_app
 PRIORITY_QUEUE=
 PRAMOTIONAL_QUEUE=
 ```
+## Run Application
+```
+# Run REST api service
+make serve-restapi
+
+# Run each Queue Subscriber in seperate terminal
+make ARGS="--queue-name=pramotional" run-subscriber
+make ARGS="--queue-name=priority" run-subscriber
+
+# Checkout build and run frontend application (https://github.com/pankaj91as/food-delivery-app)
+npm run build && npm start
+```
