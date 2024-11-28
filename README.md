@@ -85,3 +85,18 @@ Listener
             else
                 promotional que will trigger & send notification
 ```
+
+## Environment
+
+```
+MQ_USER=admin
+MQ_PASS=admin123
+MQ_HOST=0.0.0.0
+MQ_PORT=5672
+
+APP_HOST=0.0.0.0
+APP_PORT=8000
+
+PRIORITY_QUEUE=
+PRAMOTIONAL_QUEUE=
+```
