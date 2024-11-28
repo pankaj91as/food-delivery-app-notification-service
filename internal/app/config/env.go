@@ -10,9 +10,10 @@ import (
 var Environment loader
 
 type loader struct {
-	APP application
-	MQ  messageQue
-	DB  database
+	APP  application
+	MQ   messageQue
+	DB   database
+	CONF configuration
 }
 
 type application struct {
@@ -34,6 +35,11 @@ type database struct {
 	DBHost     *string `env:"MYSQL_HOST, default=localhost"`
 	DBPort     *string `env:"MYSQL_PORT, default=3306"`
 	DBName     *string `env:"MYSQL_DBNAME, default=food_app"`
+}
+
+type configuration struct {
+	PriorityQue    *string `env:"PRIORITY_QUEUE"`
+	PramotionalQue *string `env:"PRAMOTIONAL_QUEUE"`
 }
 
 func init() {

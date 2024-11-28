@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"context"
@@ -9,13 +9,9 @@ import (
 	"time"
 )
 
-func main() {
-	// Define Required Variables
-	publisherQueName := "priority"
-	var forever chan struct{}
-
+func Publish(publisherQueName, messageBody string) {
 	// Define Context with timeout 5 Second
-	_, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// Panic Recover Functionality
@@ -29,24 +25,19 @@ func main() {
 
 	conn := rbtmq.OpenConnection()
 	defer conn.Close()
-
-	ch := rbtmq.CreateChannel(conn)
-	defer ch.Close()
 	if !conn.IsClosed() {
+		ch := rbtmq.CreateChannel(conn)
+		defer ch.Close()
+
 		que := rbtmq.DeclareQueue(ch, &publisherQueName, false, false, false, false, nil)
 
-		messages := rbtmq.ConsumeContent(ch, que)
-
-		go func() {
-			for d := range messages {
-				log.Printf("Received a message: %s", d.Body)
-			}
-		}()
-
-		log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-
-		<-forever
+		err := rbtmq.PublishContent(ch, que, ctx, "", false, false, messageBody)
+		if err != nil {
+			fmt.Println(err)
+		}
 	} else {
 		log.Panic("Message Queue is not alive")
 	}
+
+	log.Printf(" [x] Sent %s\n", messageBody)
 }
