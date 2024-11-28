@@ -13,6 +13,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/cors"
 )
 
 func RDBMS(ctx context.Context) (*sqlx.DB, error) {
@@ -36,8 +37,11 @@ func RDBMS(ctx context.Context) (*sqlx.DB, error) {
 func LaunchServer(timeout time.Duration, routeHandler *mux.Router) *http.Server {
 	fmt.Println("🚀 Launching REST Server...")
 
+	c := cors.AllowAll()
+	handler := c.Handler(routeHandler)
+
 	srv := &http.Server{
-		Handler:      routeHandler,
+		Handler:      handler,
 		Addr:         *config.Environment.APP.Host + ":" + *config.Environment.APP.Port,
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
