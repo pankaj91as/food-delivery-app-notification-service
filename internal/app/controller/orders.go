@@ -53,9 +53,9 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 		PriorityQueSlice := strings.Split(*PriorityQue, ",")
 
 		if slices.Contains(PriorityQueSlice, order.OrderStatus) {
-			handler.Publish("priority", "Priority Message!")
+			handler.Publish(*config.Environment.CONF.PriorityQueueName, "Priority Message!")
 		} else {
-			handler.Publish("pramotional", "Pramotional Message!")
+			handler.Publish(*config.Environment.CONF.PramotionalQueueName, "Pramotional Message!")
 		}
 
 		// return response

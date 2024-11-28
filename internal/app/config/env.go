@@ -38,8 +38,10 @@ type database struct {
 }
 
 type configuration struct {
-	PriorityQue    *string `env:"PRIORITY_QUEUE"`
-	PramotionalQue *string `env:"PRAMOTIONAL_QUEUE"`
+	PriorityQueueName    *string `env:"PRIORITY_QUEUE_NAME"`
+	PramotionalQueueName *string `env:"PRAMOTIONAL_QUEUE_NAME"`
+	PriorityQue          *string `env:"PRIORITY_QUEUE"`
+	PramotionalQue       *string `env:"PRAMOTIONAL_QUEUE"`
 }
 
 func init() {
