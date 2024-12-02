@@ -91,7 +91,7 @@ Listener
 ```
 MQ_USERNAME=admin
 MQ_PASSWORD=admin123
-MQ_HOST=0.0.0.0
+MQ_HOST=rabbitmq
 MQ_PORT=5672
 
 APP_HOST=0.0.0.0
@@ -99,11 +99,13 @@ APP_PORT=8000
 
 MYSQL_USERNAME=app_user
 MYSQL_PASSWORD=app_password
-MYSQL_HOST=0.0.0.0
+MYSQL_HOST=mysql
 MYSQL_PORT=3306
 MYSQL_DBNAME=food_app
 
-PRIORITY_QUEUE=
+PRAMOTIONAL_QUEUE_NAME=pramotional
+PRIORITY_QUEUE_NAME=priority
+PRIORITY_QUEUE=placed,preparing,ready,pickup,cancel,undelivered
 PRAMOTIONAL_QUEUE=
 ```
 ## Run Application
