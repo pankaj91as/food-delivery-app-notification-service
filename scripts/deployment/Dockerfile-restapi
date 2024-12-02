@@ -13,7 +13,7 @@ COPY .env ./scripts/build/.env
 COPY Makefile .
 
 # Expose default app port
-EXPOSE 8000
+EXPOSE 8000:8000
 
 # Command to run the application
 CMD ["make","restapi"]
