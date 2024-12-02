@@ -9,3 +9,9 @@ type Response struct {
 	Data    []interface{}
 	Message string
 }
+
+type MQPayload struct {
+	Message          string
+	NotificationType string
+	QueueName        string
+}

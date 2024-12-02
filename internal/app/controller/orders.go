@@ -58,13 +58,20 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 
 		// Notification Template
 		notificationType := []string{"sms", "email", "push"}
-		notificationTemplate, err := config.GetNotificationTemplate(*config.Environment.CONF.PriorityQueueName, notificationType[rand.Intn(len(notificationType))])
+		selectedNotificationType := notificationType[rand.Intn(len(notificationType))]
+		notificationTemplate, err := config.GetNotificationTemplate(*config.Environment.CONF.PriorityQueueName, selectedNotificationType)
 		if err != nil {
-			log.Panicf("Unable to get template from %s/%s", *config.Environment.CONF.PriorityQueueName, notificationType[rand.Intn(len(notificationType))])
+			log.Panicf("Unable to get template from %s/%s", *config.Environment.CONF.PriorityQueueName, selectedNotificationType)
+		}
+
+		messageJson := &model.MQPayload{
+			Message:          notificationTemplate,
+			NotificationType: selectedNotificationType,
+			QueueName:        *config.Environment.CONF.PramotionalQueueName,
 		}
 
 		// Publish payload into message queue
-		handler.Publish(*config.Environment.CONF.PriorityQueueName, notificationTemplate)
+		handler.Publish(*config.Environment.CONF.PriorityQueueName, messageJson)
 
 		RowsAffected, _ := c.restService.UpdateOrderByID(ctx, orderID, order.OrderStatus)
 		if int(RowsAffected) > 0 {
@@ -84,13 +91,20 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 
 		// Notification Template
 		notificationType := []string{"sms", "email", "push"}
-		notificationTemplate, err := config.GetNotificationTemplate(*config.Environment.CONF.PramotionalQueueName, notificationType[rand.Intn(len(notificationType))])
+		selectedNotificationType := notificationType[rand.Intn(len(notificationType))]
+		notificationTemplate, err := config.GetNotificationTemplate(*config.Environment.CONF.PramotionalQueueName, selectedNotificationType)
 		if err != nil {
-			log.Panicf("Unable to get template from %s/%s", *config.Environment.CONF.PramotionalQueueName, notificationType[rand.Intn(len(notificationType))])
+			log.Panicf("Unable to get template from %s/%s", *config.Environment.CONF.PramotionalQueueName, selectedNotificationType)
+		}
+
+		messageJson := &model.MQPayload{
+			Message:          notificationTemplate,
+			NotificationType: selectedNotificationType,
+			QueueName:        *config.Environment.CONF.PramotionalQueueName,
 		}
 
 		// Publish payload into message queue
-		handler.Publish(*config.Environment.CONF.PramotionalQueueName, notificationTemplate)
+		handler.Publish(*config.Environment.CONF.PramotionalQueueName, messageJson)
 	}
 
 	// return response
