@@ -61,24 +61,24 @@ services:
     volumes:
       - redis_data:/data
   
-  # publisher-app:
-  #   build:
-  #     context: ./publisher-app
-  #     dockerfile: Dockerfile-publisher
-  #   container_name: publisher-app
-  #   networks:
-  #     - food-app-network
-  #   depends_on:
-  #     - rabbitmq
-  #     - mysql
-  #   environment:
-  #     RABBITMQ_HOST: rabbitmq
-  #     RABBITMQ_PORT: 5672
-  #     MYSQL_HOST: mysql
-  #     MYSQL_PORT: 3306
-  #     MYSQL_USER: app_user
-  #     MYSQL_PASSWORD: app_password
-  #     MYSQL_DB: food_app_db
+  rest-api:
+    build:
+      context: ../../
+      dockerfile: scripts/deployment/Dockerfile-restapi
+    container_name: food-delivery-app-restapi
+    networks:
+      - food-app-network
+    depends_on:
+      - rabbitmq
+      - mysql
+    environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USER: app_user
+      MYSQL_PASSWORD: app_password
+      MYSQL_DB: food_app_db
 
   # subscriber-app:
   #   build:

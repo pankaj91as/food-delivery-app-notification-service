@@ -1,0 +1,19 @@
+# Final image
+FROM golang:alpine
+
+# Add a lightweight runtime
+RUN apk add --no-cache ca-certificates build-base musl-dev
+
+# Set working directory in final image
+WORKDIR /app
+
+# Copy the compiled binary from the builder stage
+COPY scripts/build/restapi ./scripts/build/restapi
+COPY .env ./scripts/build/.env
+COPY Makefile .
+
+# Expose default app port
+EXPOSE 8000
+
+# Command to run the application
+CMD ["make","restapi"]
