@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Copy the compiled binary from the builder stage
 COPY scripts/build/restapi ./scripts/build/restapi
-COPY internal/app/config/template/ ./template/
+COPY internal/app/config/template/ ./internal/app/config/template/
 COPY .env ./scripts/build/.env
 COPY Makefile .
 

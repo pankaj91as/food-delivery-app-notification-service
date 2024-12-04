@@ -25,12 +25,11 @@ func main() {
 	// Panic Recover Functionality
 	defer func() {
 		if r := recover(); r != nil {
-			fmt.Println("Panic Recovered in publisher: ", r)
+			fmt.Println("Panic Recovered in subscriber: ", r)
 		}
 	}()
 
 	rbtmq := rabbitmq.NewRabbitMQ(&config.Environment.MQ.ConString)
-
 	conn := rbtmq.OpenConnection()
 	defer conn.Close()
 

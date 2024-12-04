@@ -67,7 +67,7 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 		messageJson := &model.MQPayload{
 			Message:          notificationTemplate,
 			NotificationType: selectedNotificationType,
-			QueueName:        *config.Environment.CONF.PramotionalQueueName,
+			QueueName:        *config.Environment.CONF.PriorityQueueName,
 		}
 
 		// Publish payload into message queue
