@@ -14,6 +14,9 @@ type IRepository interface {
 
 	GetCustomers(ctx context.Context) ([]model.Customers, error)
 	GetCustomerByID(ctx context.Context, customerId string) ([]model.Customers, error)
+
+	InsertNotification(ctx context.Context, notification model.Notifications) error
+	GetNotification(ctx context.Context, notification model.Notifications, notificationStatus string) ([]model.Notifications, error)
 }
 
 type Repository struct {

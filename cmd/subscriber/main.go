@@ -57,8 +57,9 @@ func main() {
 				if err != nil {
 					log.Panic("Error while unmarshal message queue payload")
 				}
-				log.Printf("Received a message: %s", payload.Message)
-				subscriberController.PrepairNotification(ctx, payload)
+				actualNotificationMessage := subscriberController.PrepairNotification(ctx, payload)
+				subscriberController.SaveNotification(ctx, payload, actualNotificationMessage)
+				log.Printf("Received a message: %s", actualNotificationMessage)
 			}
 		}()
 

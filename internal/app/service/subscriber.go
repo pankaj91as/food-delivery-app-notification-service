@@ -7,8 +7,8 @@ import (
 )
 
 type ISubscriberService interface {
-	GetNotifications() *model.Notifications
-	InsertNotifications() error
+	GetNotifications(ctx context.Context, notification model.Notifications, notificationStatus string) ([]model.Notifications, error)
+	InsertNotifications(ctx context.Context, notification model.Notifications) error
 	GetNotificationByOrderCustomerAndTypeID(customerID, notificationType, orderID string) *model.Notifications
 
 	GetCustomerByID(ctx context.Context, customerId string) []model.Customers

@@ -69,6 +69,7 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 
 		messageJson := &model.MQPayload{
 			OrderID:          order.OrderID,
+			OrderStatus:      order.OrderStatus,
 			CustomerID:       order.CustomerID,
 			Message:          notificationTemplate,
 			NotificationType: selectedNotificationType,
@@ -102,6 +103,7 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 
 		messageJson := &model.MQPayload{
 			OrderID:          order.OrderID,
+			OrderStatus:      order.OrderStatus,
 			CustomerID:       order.CustomerID,
 			Message:          notificationTemplate,
 			NotificationType: selectedNotificationType,

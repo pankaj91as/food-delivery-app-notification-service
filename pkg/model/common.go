@@ -12,6 +12,7 @@ type Response struct {
 
 type MQPayload struct {
 	OrderID          string
+	OrderStatus      string
 	CustomerID       string
 	Message          string
 	NotificationType string
