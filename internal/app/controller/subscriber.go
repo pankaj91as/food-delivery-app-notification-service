@@ -9,6 +9,8 @@ import (
 type ISubscriberController interface {
 	PrepairNotification(ctx context.Context, payload *model.MQPayload) string
 	SaveNotification(ctx context.Context, payload *model.MQPayload, actualMessage string) error
+
+	SendNotification(ctx context.Context, message, notificationType string) error
 }
 
 type SubscriberController struct {

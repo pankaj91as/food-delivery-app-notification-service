@@ -59,7 +59,7 @@ func main() {
 				}
 				actualNotificationMessage := subscriberController.PrepairNotification(ctx, payload)
 				subscriberController.SaveNotification(ctx, payload, actualNotificationMessage)
-				log.Printf("Received a message: %s", actualNotificationMessage)
+				subscriberController.SendNotification(ctx, actualNotificationMessage, payload.NotificationType)
 			}
 		}()
 

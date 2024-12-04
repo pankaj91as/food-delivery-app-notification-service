@@ -39,3 +39,10 @@ func (subCon *SubscriberController) SaveNotification(ctx context.Context, payloa
 	}
 	return nil
 }
+
+func (subCon *SubscriberController) SendNotification(ctx context.Context, message, notificationType string) error {
+	fmt.Println("Sending Notification To User!")
+	fmt.Println(message)
+	fmt.Printf("User will get above message by %s notification!", notificationType)
+	return nil
+}
