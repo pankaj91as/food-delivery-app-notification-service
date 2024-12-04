@@ -34,6 +34,10 @@ services:
       MYSQL_PASSWORD: app_password
     volumes:
       - foodapp__data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 10
   
   phpmyadmin:
     image: phpmyadmin:latest
@@ -69,16 +73,17 @@ services:
     networks:
       - food-app-network
     depends_on:
-      - rabbitmq
       - mysql
     environment:
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: 5672
+      MQ_USERNAME: admin
+      MQ_PASSWORD: admin123
+      MQ_HOST: rabbitmq
+      MQ_PORT: 5672
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
-      MYSQL_USER: app_user
+      MYSQL_USERNAME: app_user
       MYSQL_PASSWORD: app_password
-      MYSQL_DB: food_app_db
+      MYSQL_DBNAME: food_app
     ports:
       - "8000:8000"
 

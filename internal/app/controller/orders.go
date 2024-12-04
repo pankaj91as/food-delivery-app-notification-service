@@ -54,7 +54,7 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 	PriorityQueSlice := strings.Split(*PriorityQue, ",")
 	fmt.Println(PriorityQueSlice, order.OrderStatus, slices.Contains(PriorityQueSlice, order.OrderStatus))
 	if slices.Contains(PriorityQueSlice, order.OrderStatus) {
-		fmt.Printf("%s queue triggered!\n", *config.Environment.CONF.PramotionalQueueName)
+		fmt.Printf("%s queue triggered!\n", *config.Environment.CONF.PriorityQueueName)
 
 		// Notification Template
 		notificationType := []string{"sms", "email", "push"}

@@ -17,21 +17,46 @@ import (
 )
 
 func RDBMS(ctx context.Context) (*sqlx.DB, error) {
-	db, err := sqlx.ConnectContext(ctx, "mysql",
-		*config.Environment.DB.DBUsername+":"+
-			*config.Environment.DB.DBPassword+"@("+
-			*config.Environment.DB.DBHost+":"+
-			*config.Environment.DB.DBPort+")/"+
-			*config.Environment.DB.DBName)
-	if err != nil {
-		log.Panicf("%s:%s", "MySQL database connection failed...", err)
-	}
-	//connection pooling
-	db.SetMaxOpenConns(10)
-	db.SetConnMaxLifetime(20 * time.Second)
-	log.Print("mysql database connection established successfull...")
+	var db *sqlx.DB
+	var err error
 
-	return db, nil
+	maxRetries := 20              // Maximum number of retries
+	retryDelay := 5 * time.Second // Delay between retries
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		db, err = sqlx.ConnectContext(ctx, "mysql",
+			fmt.Sprintf("%s:%s@(%s:%s)/%s",
+				*config.Environment.DB.DBUsername,
+				*config.Environment.DB.DBPassword,
+				*config.Environment.DB.DBHost,
+				*config.Environment.DB.DBPort,
+				*config.Environment.DB.DBName,
+			),
+		)
+		if err == nil {
+			// Connection succeeded
+			log.Print("mysql database connection established successfully...")
+			// Configure connection pooling
+			db.SetMaxOpenConns(10)
+			db.SetConnMaxLifetime(20 * time.Second)
+			return db, nil
+		}
+
+		// Log the retry attempt
+		log.Printf("MySQL database connection failed: %s (attempt %d/%d)", err, attempt, maxRetries)
+
+		// Check if we've exhausted retries
+		if attempt == maxRetries {
+			break
+		}
+
+		// Wait before the next attempt
+		time.Sleep(retryDelay)
+	}
+
+	// Return the last error if all retries fail
+	log.Panicf("MySQL database connection failed after %d attempts: %s", maxRetries, err)
+	return nil, err
 }
 
 func LaunchServer(timeout time.Duration, routeHandler *mux.Router) *http.Server {
