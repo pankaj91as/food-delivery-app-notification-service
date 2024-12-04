@@ -44,10 +44,15 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 		panic(err)
 	}
 	var order model.Orders
+	order.OrderID = orderID
 	err = json.Unmarshal(body, &order)
 	if err != nil {
 		panic(err)
 	}
+
+	// Notification selector
+	notificationType := []string{"sms", "email", "push"}
+	selectedNotificationType := notificationType[rand.Intn(len(notificationType))]
 
 	ctx := r.Context()
 	PriorityQue := config.Environment.CONF.PriorityQue
@@ -57,14 +62,14 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 		fmt.Printf("%s queue triggered!\n", *config.Environment.CONF.PriorityQueueName)
 
 		// Notification Template
-		notificationType := []string{"sms", "email", "push"}
-		selectedNotificationType := notificationType[rand.Intn(len(notificationType))]
 		notificationTemplate, err := config.GetNotificationTemplate(*config.Environment.CONF.PriorityQueueName, selectedNotificationType)
 		if err != nil {
 			log.Panicf("Unable to get template from %s/%s", *config.Environment.CONF.PriorityQueueName, selectedNotificationType)
 		}
 
 		messageJson := &model.MQPayload{
+			OrderID:          order.OrderID,
+			CustomerID:       order.CustomerID,
 			Message:          notificationTemplate,
 			NotificationType: selectedNotificationType,
 			QueueName:        *config.Environment.CONF.PriorityQueueName,
@@ -90,14 +95,14 @@ func (c *RestController) UpdateOrderByID(w http.ResponseWriter, r *http.Request)
 		fmt.Printf("%s queue triggered!\n", *config.Environment.CONF.PramotionalQueueName)
 
 		// Notification Template
-		notificationType := []string{"sms", "email", "push"}
-		selectedNotificationType := notificationType[rand.Intn(len(notificationType))]
 		notificationTemplate, err := config.GetNotificationTemplate(*config.Environment.CONF.PramotionalQueueName, selectedNotificationType)
 		if err != nil {
 			log.Panicf("Unable to get template from %s/%s", *config.Environment.CONF.PramotionalQueueName, selectedNotificationType)
 		}
 
 		messageJson := &model.MQPayload{
+			OrderID:          order.OrderID,
+			CustomerID:       order.CustomerID,
 			Message:          notificationTemplate,
 			NotificationType: selectedNotificationType,
 			QueueName:        *config.Environment.CONF.PramotionalQueueName,

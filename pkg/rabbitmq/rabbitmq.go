@@ -2,7 +2,10 @@ package rabbitmq
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"food-delivery-app-notification-service/internal/app/config"
+	"food-delivery-app-notification-service/pkg/model"
 	"log"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -12,7 +15,7 @@ type IRabbitMQ interface {
 	OpenConnection() *amqp.Connection
 	CreateChannel(conn *amqp.Connection) *amqp.Channel
 	DeclareQueue(ch *amqp.Channel, QueueName *string, Durable, DeleteUnUsed, Exclusive, NoWait bool, arg amqp.Table) amqp.Queue
-	PublishContent(ch *amqp.Channel, queue amqp.Queue, ctx context.Context, exchange string, mandatory, immediate bool, body string) error
+	PublishContent(ch *amqp.Channel, queue amqp.Queue, ctx context.Context, exchange string, mandatory, immediate bool, messageBody *model.MQPayload) error
 	ConsumeContent(ch *amqp.Channel, queue amqp.Queue) <-chan amqp.Delivery
 }
 type RabbitMQ struct {
@@ -69,19 +72,31 @@ func (rmq *RabbitMQ) DeclareQueue(ch *amqp.Channel, QueueName *string, Durable, 
 	return q
 }
 
-func (rmq *RabbitMQ) PublishContent(ch *amqp.Channel, queue amqp.Queue, ctx context.Context, exchange string, mandatory, immediate bool, body string) error {
+func (rmq *RabbitMQ) PublishContent(ch *amqp.Channel, queue amqp.Queue, ctx context.Context, exchange string, mandatory, immediate bool, messageBody *model.MQPayload) error {
 	fmt.Printf("Sending Message in queue: %s\n", queue.Name)
 
-	err := ch.PublishWithContext(ctx,
+	messageByte, err := json.Marshal(messageBody)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Define message priority
+	priority := 0
+	if messageBody.QueueName == *config.Environment.CONF.PriorityQueueName {
+		priority = 9
+	}
+
+	err = ch.PublishWithContext(ctx,
 		"",         // exchange
 		queue.Name, // routing key
 		false,      // mandatory
 		false,      // immediate
 		amqp.Publishing{
 			ContentType: "text/plain",
-			Body:        []byte(body),
-		})
-
+			Body:        messageByte,
+			Priority:    uint8(priority),
+		},
+	)
 	if err != nil {
 		log.Panicf("%s: %s", "Failed to publish a message", err)
 	}

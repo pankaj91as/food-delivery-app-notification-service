@@ -13,6 +13,7 @@ type IRepository interface {
 	UpdateOrderByID(ctx context.Context, OrderID, OrderStatus string) (int64, error)
 
 	GetCustomers(ctx context.Context) ([]model.Customers, error)
+	GetCustomerByID(ctx context.Context, customerId string) ([]model.Customers, error)
 }
 
 type Repository struct {

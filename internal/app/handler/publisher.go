@@ -32,7 +32,7 @@ func Publish(publisherQueName string, messageBody *model.MQPayload) {
 
 		que := rbtmq.DeclareQueue(ch, &messageBody.QueueName, false, false, false, false, nil)
 
-		err := rbtmq.PublishContent(ch, que, ctx, "", false, false, messageBody.Message)
+		err := rbtmq.PublishContent(ch, que, ctx, "", false, false, messageBody)
 		if err != nil {
 			fmt.Println(err)
 		}
